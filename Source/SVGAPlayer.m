@@ -15,6 +15,8 @@
 #import "SVGAVectorLayer.h"
 #import "SVGAAudioLayer.h"
 #import "SVGAAudioEntity.h"
+#import "UIImage+cirleImage.h"
+
 
 @interface SVGAPlayer ()
 
@@ -84,24 +86,11 @@
     }
     self.displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(next)];
     self.displayLink.frameInterval = 60 / self.videoItem.FPS;
-    [self.displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:self.mainRunLoopMode];
+    [self.displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
     self.forwardAnimating = !self.reversing;
 }
 
 - (void)startAnimationWithRange:(NSRange)range reverse:(BOOL)reverse {
-    if (self.videoItem == nil) {
-        NSLog(@"videoItem could not be nil！");
-        return;
-    } else if (self.drawLayer == nil) {
-        self.videoItem = _videoItem;
-    }
-    [self stopAnimation:NO];
-    self.loopCount = 0;
-    if (self.videoItem.FPS == 0) {
-        NSLog(@"videoItem FPS could not be 0！");
-        return;
-    }
-    
     self.currentRange = range;
     self.reversing = reverse;
     if (reverse) {
@@ -110,10 +99,7 @@
     else {
         self.currentFrame = MAX(0, range.location);
     }
-    self.forwardAnimating = !self.reversing;
-    self.displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(next)];
-    self.displayLink.frameInterval = 60 / self.videoItem.FPS;
-    [self.displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:self.mainRunLoopMode];
+    [self startAnimation];
 }
 
 - (void)pauseAnimation {
@@ -172,7 +158,7 @@
         }
         self.displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(next)];
         self.displayLink.frameInterval = 60 / self.videoItem.FPS;
-        [self.displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:self.mainRunLoopMode];
+        [self.displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
     }
 }
 
@@ -412,7 +398,7 @@
 
 #pragma mark - Dynamic Object
 
-- (void)setImage:(UIImage *)image forKey:(NSString *)aKey {
+- (void)setImage:(UIImage *)image forKey:(NSString *)aKey cornerRadius:(CGFloat)cornerRadius{
     if (image == nil) {
         return;
     }
@@ -422,27 +408,33 @@
     if (self.contentLayers.count > 0) {
         for (SVGAContentLayer *layer in self.contentLayers) {
             if ([layer isKindOfClass:[SVGAContentLayer class]] && [layer.imageKey isEqualToString:aKey]) {
+                if (cornerRadius >0) {
+                    image = [image mq_cireImageWithRadius:cornerRadius];
+                }else if (cornerRadius == -1){
+                    image = [image mq_cireImage];
+                }
                 layer.bitmapLayer.contents = (__bridge id _Nullable)([image CGImage]);
             }
         }
     }
 }
 
-- (void)setImageWithURL:(NSURL *)URL forKey:(NSString *)aKey {
+- (void)setImageWithURL:(NSURL *)URL forKey:(NSString *)aKey cornerRadius:(CGFloat)cornerRadius{
     [[[NSURLSession sharedSession] dataTaskWithURL:URL completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         if (error == nil && data != nil) {
             UIImage *image = [UIImage imageWithData:data];
+   
             if (image != nil) {
                 [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                    [self setImage:image forKey:aKey];
+                    [self setImage:image forKey:aKey cornerRadius:cornerRadius];
                 }];
             }
         }
     }] resume];
 }
 
-- (void)setImage:(UIImage *)image forKey:(NSString *)aKey referenceLayer:(CALayer *)referenceLayer {
-    [self setImage:image forKey:aKey];
+- (void)setImage:(UIImage *)image forKey:(NSString *)aKey cornerRadius:(CGFloat)cornerRadius referenceLayer:(CALayer *)referenceLayer {
+    [self setImage:image forKey:aKey cornerRadius:cornerRadius];
 }
 
 - (void)setAttributedText:(NSAttributedString *)attributedText forKey:(NSString *)aKey {
@@ -537,13 +529,6 @@
         _dynamicDrawings = @{};
     }
     return _dynamicDrawings;
-}
-
-- (NSRunLoopMode)mainRunLoopMode {
-    if (!_mainRunLoopMode) {
-        _mainRunLoopMode = NSRunLoopCommonModes;
-    }
-    return _mainRunLoopMode;
 }
 
 @end

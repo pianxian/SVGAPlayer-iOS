@@ -8,6 +8,13 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+typedef struct metalColorInfo{
+    CGFloat r;
+    CGFloat g;
+    CGFloat b;
+    CGFloat a;
+    
+}metalColorInfo;
 
 @class SVGAVideoEntity, SVGAVideoSpriteEntity, SVGAVideoSpriteFrameEntity, SVGABitmapLayer, SVGAVectorLayer, SVGAAudioEntity;
 @class SVGAProtoMovieEntity;
@@ -30,7 +37,8 @@
 - (void)resetImagesWithProtoObject:(SVGAProtoMovieEntity *)protoObject;
 - (void)resetSpritesWithProtoObject:(SVGAProtoMovieEntity *)protoObject;
 - (void)resetAudiosWithProtoObject:(SVGAProtoMovieEntity *)protoObject;
-
+- (void)resetImagesWithProtoObject:(SVGAProtoMovieEntity *)protoObject kernel:(CIColorKernel *)kernel metalColorInfo:(metalColorInfo)metalColorInfo;
+- (void)resetImagesWithJSONObject:(NSDictionary *)JSONObject kernel:(CIColorKernel *)kernel metalColorInfo:(metalColorInfo)metalColorInfo;
 + (SVGAVideoEntity *)readCache:(NSString *)cacheKey;
 // NSCache缓存
 - (void)saveCache:(NSString *)cacheKey;

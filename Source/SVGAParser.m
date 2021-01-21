@@ -30,16 +30,45 @@ static NSOperationQueue *unzipQueue;
     unzipQueue = [NSOperationQueue new];
     unzipQueue.maxConcurrentOperationCount = 1;
 }
-
 - (void)parseWithURL:(nonnull NSURL *)URL
-     completionBlock:(void ( ^ _Nonnull )(SVGAVideoEntity * _Nullable videoItem))completionBlock
-        failureBlock:(void ( ^ _Nullable)(NSError * _Nullable error))failureBlock {
-    [self parseWithURLRequest:[NSURLRequest requestWithURL:URL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:20.0]
-    completionBlock:completionBlock
-       failureBlock:failureBlock];
+     completionBlock:(void ( ^ _Nonnull )(SVGAVideoEntity * _Nullable videoItem,NSData * _Nullable data))completionBlock
+        failureBlock:(void ( ^ _Nullable)(NSError * _Nullable error))failureBlock{
+    [self parseWithURL:URL Kernel:nil metalColorInfo:(metalColorInfo){255.f,255.f,255.f,1.f} completionBlock:completionBlock failureBlock:failureBlock];
 }
 
-- (void)parseWithURLRequest:(NSURLRequest *)URLRequest completionBlock:(void (^)(SVGAVideoEntity * _Nullable))completionBlock failureBlock:(void (^)(NSError * _Nullable))failureBlock {
+
+- (void)parseWithURLRequest:(NSURLRequest *_Nullable)URLRequest
+            completionBlock:(void (^_Nonnull)(SVGAVideoEntity * _Nullable videoItem,NSData  * _Nullable  data))completionBlock failureBlock:(void (^_Nullable)(NSError * _Nullable))failureBlock{
+    [self parseWithURLRequest:URLRequest Kernel:nil metalColorInfo:(metalColorInfo){255.f,255.f,255.f,1.f} completionBlock:completionBlock failureBlock:failureBlock];
+}
+
+- (void)parseWithCacheKey:(nonnull NSString *)cacheKey
+          completionBlock:(void ( ^ _Nonnull)(SVGAVideoEntity * _Nonnull videoItem))completionBlock
+             failureBlock:(void ( ^ _Nullable)(NSError * _Nonnull error))failureBlock{
+    [self parseWithCacheKey:cacheKey Kernel:nil metalColorInfo:(metalColorInfo){255.f,255.f,255.f,1.f} completionBlock:completionBlock failureBlock:failureBlock];
+}
+
+- (void)parseWithNamed:(NSString *_Nullable)named
+              inBundle:(NSBundle *_Nullable)inBundle
+       completionBlock:(void (^_Nonnull)(SVGAVideoEntity * _Nonnull videoItem))completionBlock
+          failureBlock:(void (^_Nullable)(NSError * _Nonnull error))failureBlock{
+    [self parseWithNamed:named inBundle:inBundle Kernel:nil metalColorInfo:(metalColorInfo){255.f,255.f,255.f,1.f} completionBlock:completionBlock failureBlock:failureBlock];
+}
+- (void)parseWithURL:(nonnull NSURL *)URL
+              Kernel:(nullable CIColorKernel *)kenel
+              metalColorInfo:(metalColorInfo)metalColorInfo
+     completionBlock:(void ( ^ _Nonnull )(SVGAVideoEntity * _Nullable videoItem,NSData * _Nullable data))completionBlock
+        failureBlock:(void ( ^ _Nullable)(NSError * _Nullable error))failureBlock {
+    [self parseWithURLRequest:[NSURLRequest requestWithURL:URL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:20.0] Kernel:kenel metalColorInfo:metalColorInfo completionBlock:completionBlock failureBlock:failureBlock];
+//    [self parseWithURLRequest:[NSURLRequest requestWithURL:URL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:20.0]
+//    completionBlock:completionBlock
+//       failureBlock:failureBlock];
+}
+
+- (void)parseWithURLRequest:(NSURLRequest *)URLRequest
+                     Kernel:(nullable CIColorKernel *)kenel
+                     metalColorInfo:(metalColorInfo)metalColorInfo
+            completionBlock:(void (^)(SVGAVideoEntity * _Nullable videoItem,NSData  * _Nullable  data))completionBlock failureBlock:(void (^)(NSError * _Nullable))failureBlock {
     if (URLRequest.URL == nil) {
         if (failureBlock) {
             [[NSOperationQueue mainQueue] addOperationWithBlock:^{
@@ -49,10 +78,10 @@ static NSOperationQueue *unzipQueue;
         return;
     }
     if ([[NSFileManager defaultManager] fileExistsAtPath:[self cacheDirectory:[self cacheKey:URLRequest.URL]]]) {
-        [self parseWithCacheKey:[self cacheKey:URLRequest.URL] completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
+        [self parseWithCacheKey:[self cacheKey:URLRequest.URL] Kernel:kenel metalColorInfo:metalColorInfo completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
             if (completionBlock) {
                 [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                    completionBlock(videoItem);
+                    completionBlock(videoItem,nil);
                 }];
             }
         } failureBlock:^(NSError * _Nonnull error) {
@@ -63,14 +92,15 @@ static NSOperationQueue *unzipQueue;
                 }];
             }
         }];
+
         return;
     }
     [[[NSURLSession sharedSession] dataTaskWithRequest:URLRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         if (error == nil && data != nil) {
-            [self parseWithData:data cacheKey:[self cacheKey:URLRequest.URL] completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
+            [self parseWithData:data cacheKey:[self cacheKey:URLRequest.URL] Kernel:kenel metalColorInfo:metalColorInfo completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
                 if (completionBlock) {
                     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                        completionBlock(videoItem);
+                        completionBlock(videoItem,data);
                     }];
                 }
             } failureBlock:^(NSError * _Nonnull error) {
@@ -94,8 +124,10 @@ static NSOperationQueue *unzipQueue;
 
 - (void)parseWithNamed:(NSString *)named
               inBundle:(NSBundle *)inBundle
-       completionBlock:(void (^)(SVGAVideoEntity * _Nonnull))completionBlock
-          failureBlock:(void (^)(NSError * _Nonnull))failureBlock {
+                Kernel:(nullable CIColorKernel *)kenel
+                metalColorInfo:(metalColorInfo)metalColorInfo
+       completionBlock:(void (^)(SVGAVideoEntity * _Nonnull videoItem))completionBlock
+          failureBlock:(void (^)(NSError * _Nonnull error))failureBlock {
     NSString *filePath = [(inBundle ?: [NSBundle mainBundle]) pathForResource:named ofType:@"svga"];
     if (filePath == nil) {
         if (failureBlock) {
@@ -105,14 +137,14 @@ static NSOperationQueue *unzipQueue;
         }
         return;
     }
-    [self parseWithData:[NSData dataWithContentsOfFile:filePath]
-               cacheKey:[self cacheKey:[NSURL fileURLWithPath:filePath]]
-        completionBlock:completionBlock
-           failureBlock:failureBlock];
+    [self parseWithData:[NSData dataWithContentsOfFile:filePath] cacheKey:[self cacheKey:[NSURL fileURLWithPath:filePath]] Kernel:kenel metalColorInfo:metalColorInfo completionBlock:completionBlock failureBlock:failureBlock];
+
 }
 
 - (void)parseWithCacheKey:(nonnull NSString *)cacheKey
-          completionBlock:(void ( ^ _Nullable)(SVGAVideoEntity * _Nonnull videoItem))completionBlock
+                   Kernel:(nullable CIColorKernel *)kenel
+                   metalColorInfo:(metalColorInfo)metalColorInfo
+          completionBlock:(void ( ^ _Nonnull)(SVGAVideoEntity * _Nonnull videoItem))completionBlock
              failureBlock:(void ( ^ _Nullable)(NSError * _Nonnull error))failureBlock {
     [parseQueue addOperationWithBlock:^{
         SVGAVideoEntity *cacheItem = [SVGAVideoEntity readCache:cacheKey];
@@ -131,7 +163,13 @@ static NSOperationQueue *unzipQueue;
             SVGAProtoMovieEntity *protoObject = [SVGAProtoMovieEntity parseFromData:protoData error:&err];
             if (!err && [protoObject isKindOfClass:[SVGAProtoMovieEntity class]]) {
                 SVGAVideoEntity *videoItem = [[SVGAVideoEntity alloc] initWithProtoObject:protoObject cacheDir:cacheDir];
-                [videoItem resetImagesWithProtoObject:protoObject];
+                if (kenel) {
+                    [videoItem resetImagesWithProtoObject:protoObject kernel:kenel metalColorInfo:metalColorInfo];
+
+                }else{
+                    [videoItem resetImagesWithProtoObject:protoObject];
+
+                }
                 [videoItem resetSpritesWithProtoObject:protoObject];
                 [videoItem resetAudiosWithProtoObject:protoObject];
                 if (self.enabledMemoryCache) {
@@ -160,7 +198,11 @@ static NSOperationQueue *unzipQueue;
                 NSDictionary *JSONObject = [NSJSONSerialization JSONObjectWithData:JSONData options:kNilOptions error:&err];
                 if ([JSONObject isKindOfClass:[NSDictionary class]]) {
                     SVGAVideoEntity *videoItem = [[SVGAVideoEntity alloc] initWithJSONObject:JSONObject cacheDir:cacheDir];
-                    [videoItem resetImagesWithJSONObject:JSONObject];
+                    if (kenel) {
+                        [videoItem resetImagesWithJSONObject:JSONObject kernel:kenel metalColorInfo:metalColorInfo];
+                    }else{
+                        [videoItem resetImagesWithJSONObject:JSONObject];
+                    }
                     [videoItem resetSpritesWithJSONObject:JSONObject];
                     if (self.enabledMemoryCache) {
                         [videoItem saveCache:cacheKey];
@@ -197,10 +239,18 @@ static NSOperationQueue *unzipQueue;
     }
     return result;
 }
+- (void)parseWithData:(nonnull NSData *)data
+             cacheKey:(nonnull NSString *)cacheKey
+      completionBlock:(void ( ^ _Nonnull)(SVGAVideoEntity * _Nonnull videoItem))completionBlock
+         failureBlock:(void ( ^ _Nullable)(NSError * _Nonnull error))failureBlock{
+    [self parseWithData:data cacheKey:cacheKey Kernel:nil metalColorInfo:(metalColorInfo){255.f,255.f,255.f,1.f} completionBlock:completionBlock failureBlock:failureBlock];
+}
 
 - (void)parseWithData:(nonnull NSData *)data
              cacheKey:(nonnull NSString *)cacheKey
-      completionBlock:(void ( ^ _Nullable)(SVGAVideoEntity * _Nonnull videoItem))completionBlock
+               Kernel:(nullable CIColorKernel *)kenel
+       metalColorInfo:(metalColorInfo)metalColorInfo
+      completionBlock:(void ( ^ _Nonnull)(SVGAVideoEntity * _Nonnull videoItem))completionBlock
          failureBlock:(void ( ^ _Nullable)(NSError * _Nonnull error))failureBlock {
     SVGAVideoEntity *cacheItem = [SVGAVideoEntity readCache:cacheKey];
     if (cacheItem != nil) {
@@ -222,7 +272,11 @@ static NSOperationQueue *unzipQueue;
             SVGAProtoMovieEntity *protoObject = [SVGAProtoMovieEntity parseFromData:inflateData error:&err];
             if (!err && [protoObject isKindOfClass:[SVGAProtoMovieEntity class]]) {
                 SVGAVideoEntity *videoItem = [[SVGAVideoEntity alloc] initWithProtoObject:protoObject cacheDir:@""];
-                [videoItem resetImagesWithProtoObject:protoObject];
+                if (kenel) {
+                    [videoItem resetImagesWithProtoObject:protoObject kernel:kenel metalColorInfo:metalColorInfo];
+                }else{
+                    [videoItem resetImagesWithProtoObject:protoObject];
+                }
                 [videoItem resetSpritesWithProtoObject:protoObject];
                 [videoItem resetAudiosWithProtoObject:protoObject];
                 if (self.enabledMemoryCache) {
@@ -241,7 +295,7 @@ static NSOperationQueue *unzipQueue;
     }
     [unzipQueue addOperationWithBlock:^{
         if ([[NSFileManager defaultManager] fileExistsAtPath:[self cacheDirectory:cacheKey]]) {
-            [self parseWithCacheKey:cacheKey completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
+            [self parseWithCacheKey:cacheKey Kernel:kenel metalColorInfo:metalColorInfo completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
                 if (completionBlock) {
                     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
                         completionBlock(videoItem);
@@ -255,6 +309,7 @@ static NSOperationQueue *unzipQueue;
                     }];
                 }
             }];
+
             return;
         }
         NSString *tmpPath = [NSTemporaryDirectory() stringByAppendingFormat:@"%u.svga", arc4random()];
@@ -280,7 +335,11 @@ static NSOperationQueue *unzipQueue;
                             SVGAProtoMovieEntity *protoObject = [SVGAProtoMovieEntity parseFromData:protoData error:&err];
                             if (!err) {
                                 SVGAVideoEntity *videoItem = [[SVGAVideoEntity alloc] initWithProtoObject:protoObject cacheDir:cacheDir];
-                                [videoItem resetImagesWithProtoObject:protoObject];
+                                if (kenel) {
+                                    [videoItem resetImagesWithProtoObject:protoObject kernel:kenel metalColorInfo:metalColorInfo];
+                                }else{
+                                    [videoItem resetImagesWithProtoObject:protoObject];
+                                }
                                 [videoItem resetSpritesWithProtoObject:protoObject];
                                 if (self.enabledMemoryCache) {
                                     [videoItem saveCache:cacheKey];
@@ -308,7 +367,11 @@ static NSOperationQueue *unzipQueue;
                                 NSDictionary *JSONObject = [NSJSONSerialization JSONObjectWithData:JSONData options:kNilOptions error:&err];
                                 if ([JSONObject isKindOfClass:[NSDictionary class]]) {
                                     SVGAVideoEntity *videoItem = [[SVGAVideoEntity alloc] initWithJSONObject:JSONObject cacheDir:cacheDir];
-                                    [videoItem resetImagesWithJSONObject:JSONObject];
+                                    if (kenel) {
+                                        [videoItem resetImagesWithJSONObject:JSONObject kernel:kenel metalColorInfo:metalColorInfo];
+                                    }else{
+                                        [videoItem resetImagesWithJSONObject:JSONObject];
+                                    }
                                     [videoItem resetSpritesWithJSONObject:JSONObject];
                                     if (self.enabledMemoryCache) {
                                         [videoItem saveCache:cacheKey];

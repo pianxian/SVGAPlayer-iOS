@@ -8,6 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
+
+
+
+
 @class SVGAVideoEntity, SVGAPlayer;
 
 @protocol SVGAPlayerDelegate <NSObject>
@@ -28,7 +32,6 @@ typedef void(^SVGAPlayerDynamicDrawingBlock)(CALayer *contentLayer, NSInteger fr
 @property (nonatomic, assign) IBInspectable int loops;
 @property (nonatomic, assign) IBInspectable BOOL clearsAfterStop;
 @property (nonatomic, copy) NSString *fillMode;
-@property (nonatomic, copy) NSRunLoopMode mainRunLoopMode;
 
 - (void)startAnimation;
 - (void)startAnimationWithRange:(NSRange)range reverse:(BOOL)reverse;
@@ -40,9 +43,10 @@ typedef void(^SVGAPlayerDynamicDrawingBlock)(CALayer *contentLayer, NSInteger fr
 
 #pragma mark - Dynamic Object
 
-- (void)setImage:(UIImage *)image forKey:(NSString *)aKey;
-- (void)setImageWithURL:(NSURL *)URL forKey:(NSString *)aKey;
-- (void)setImage:(UIImage *)image forKey:(NSString *)aKey referenceLayer:(CALayer *)referenceLayer; // deprecated from 2.0.1
+- (void)setImage:(UIImage *)image forKey:(NSString *)aKey cornerRadius:(CGFloat)cornerRadius;
+- (void)setImageWithURL:(NSURL *)URL forKey:(NSString *)aKey cornerRadius:(CGFloat)cornerRadius;
+
+- (void)setImage:(UIImage *)image forKey:(NSString *)aKey cornerRadius:(CGFloat)cornerRadius referenceLayer:(CALayer *)referenceLayer; // deprecated from 2.0.1
 - (void)setAttributedText:(NSAttributedString *)attributedText forKey:(NSString *)aKey;
 - (void)setDrawingBlock:(SVGAPlayerDynamicDrawingBlock)drawingBlock forKey:(NSString *)aKey;
 - (void)setHidden:(BOOL)hidden forKey:(NSString *)aKey;

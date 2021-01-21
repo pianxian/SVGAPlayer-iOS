@@ -8,7 +8,7 @@
 
 #import "SVGAImageView.h"
 #import "SVGAParser.h"
-
+#import "SVGAVideoEntity.h"
 static SVGAParser *sharedParser;
 
 @implementation SVGAImageView
@@ -29,12 +29,21 @@ static SVGAParser *sharedParser;
 - (void)setImageName:(NSString *)imageName {
     _imageName = imageName;
     if ([imageName hasPrefix:@"http://"] || [imageName hasPrefix:@"https://"]) {
-        [sharedParser parseWithURL:[NSURL URLWithString:imageName] completionBlock:^(SVGAVideoEntity * _Nullable videoItem) {
+//        metalColorInfo info = {1,1,1,1};
+        [sharedParser parseWithURL:[NSURL URLWithString:imageName]  completionBlock:^(SVGAVideoEntity * _Nullable videoItem, NSData * _Nullable data) {
             [self setVideoItem:videoItem];
             if (self.autoPlay) {
                 [self startAnimation];
             }
-        } failureBlock:nil];
+        } failureBlock:^(NSError * _Nullable error) {
+            
+        }];
+//        [sharedParser parseWithURL:[NSURL URLWithString:imageName] completionBlock:^(SVGAVideoEntity * _Nullable videoItem,NSData *_Nullable data) {
+//            [self setVideoItem:videoItem];
+//            if (self.autoPlay) {
+//                [self startAnimation];
+//            }
+//        } failureBlock:nil];
     }
     else {
         [sharedParser parseWithNamed:imageName inBundle:nil completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
@@ -43,6 +52,7 @@ static SVGAParser *sharedParser;
                 [self startAnimation];
             }
         } failureBlock:nil];
+  
     }
 }
 
