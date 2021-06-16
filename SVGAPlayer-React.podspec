@@ -16,14 +16,14 @@ Pod::Spec.new do |s|
   s.subspec 'Core' do |ss|
     ss.source_files  = "Source/*.{h,m}", "React/*.{h,m}"
     ss.requires_arc = true
-    ss.dependency 'SSZipArchive', '>= 1.8.1'
+    ss.dependency 'SSZipArchive'
     ss.library = "z"
     ss.dependency 'SVGAPlayer/ProtoFiles'
   end
   s.subspec 'ProtoFiles' do |ss|
     ss.source_files  = "Source/pbobjc/*.{h,m}"
     ss.requires_arc = false
-    ss.dependency 'Protobuf', '~> 3.4'
+    ss.dependency 'Protobuf'
     ss.pod_target_xcconfig = {
       'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) GPB_USE_PROTOBUF_FRAMEWORK_IMPORTS=1',
     }
