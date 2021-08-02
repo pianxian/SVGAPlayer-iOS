@@ -23,4 +23,6 @@
 
 - (SVGAContentLayer *)requestLayerWithBitmap:(UIImage *)bitmap;
 
+-(void)updateFrames:(NSArray<SVGAVideoSpriteFrameEntity *> *)frames;
+
 @end

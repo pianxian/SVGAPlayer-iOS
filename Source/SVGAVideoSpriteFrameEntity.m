@@ -9,13 +9,12 @@
 #import "SVGAVideoSpriteFrameEntity.h"
 #import "SVGAVectorLayer.h"
 #import "SVGABezierPath.h"
-#import "Svga.pbobjc.h"
 
 @interface SVGAVideoSpriteFrameEntity ()
 
 @property (nonatomic, strong) SVGAVideoSpriteFrameEntity *previousFrame;
 @property (nonatomic, assign) CGFloat alpha;
-@property (nonatomic, assign) CGAffineTransform transform;
+//@property (nonatomic, assign) CGAffineTransform transform;
 @property (nonatomic, assign) CGRect layout;
 @property (nonatomic, assign) CGFloat nx;
 @property (nonatomic, assign) CGFloat ny;
@@ -83,11 +82,26 @@
     return self;
 }
 
+-(void)resetLayout{
+    CGFloat llx = _transform.a * _layout.origin.x + _transform.c * _layout.origin.y + _transform.tx;
+    CGFloat lrx = _transform.a * (_layout.origin.x + _layout.size.width) + _transform.c * _layout.origin.y + _transform.tx;
+    CGFloat lbx = _transform.a * _layout.origin.x + _transform.c * (_layout.origin.y + _layout.size.height) + _transform.tx;
+    CGFloat rbx = _transform.a * (_layout.origin.x + _layout.size.width) + _transform.c * (_layout.origin.y + _layout.size.height) + _transform.tx;
+    CGFloat lly = _transform.b * _layout.origin.x + _transform.d * _layout.origin.y + _transform.ty;
+    CGFloat lry = _transform.b * (_layout.origin.x + _layout.size.width) + _transform.d * _layout.origin.y + _transform.ty;
+    CGFloat lby = _transform.b * _layout.origin.x + _transform.d * (_layout.origin.y + _layout.size.height) + _transform.ty;
+    CGFloat rby = _transform.b * (_layout.origin.x + _layout.size.width) + _transform.d * (_layout.origin.y + _layout.size.height) + _transform.ty;
+    
+    _nx = MIN(MIN(lbx,  rbx), MIN(llx, lrx));
+    _ny = MIN(MIN(lby,  rby), MIN(lly, lry));
+}
 - (instancetype)initWithProtoObject:(SVGAProtoFrameEntity *)protoObject {
     self = [super init];
     if (self) {
         _alpha = 0.0;
         _layout = CGRectZero;
+
+        _protoObject = protoObject;
         _transform = CGAffineTransformMake(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
         if ([protoObject isKindOfClass:[SVGAProtoFrameEntity class]]) {
             _alpha = protoObject.alpha;
@@ -120,8 +134,10 @@
         CGFloat lry = _transform.b * (_layout.origin.x + _layout.size.width) + _transform.d * _layout.origin.y + _transform.ty;
         CGFloat lby = _transform.b * _layout.origin.x + _transform.d * (_layout.origin.y + _layout.size.height) + _transform.ty;
         CGFloat rby = _transform.b * (_layout.origin.x + _layout.size.width) + _transform.d * (_layout.origin.y + _layout.size.height) + _transform.ty;
+        
         _nx = MIN(MIN(lbx,  rbx), MIN(llx, lrx));
         _ny = MIN(MIN(lby,  rby), MIN(lly, lry));
+
     }
     return self;
 }

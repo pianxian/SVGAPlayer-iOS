@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		32E21CCC26B7D3C5008EB6EE /* homeLand_tribeShark.svga in Resources */ = {isa = PBXBuildFile; fileRef = 32E21CCB26B7D3C5008EB6EE /* homeLand_tribeShark.svga */; };
 		4B62B1C5E6CE2BE2D914927B /* libPods-SVGAPlayer React.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 92332F7A897BF4379D765B05 /* libPods-SVGAPlayer React.a */; };
 		63712E6521787950001AE014 /* heartbeat.svga in Resources */ = {isa = PBXBuildFile; fileRef = 63712E6421787950001AE014 /* heartbeat.svga */; };
 		63712E6821787A45001AE014 /* SVGAAudioEntity.m in Sources */ = {isa = PBXBuildFile; fileRef = 63712E6721787A45001AE014 /* SVGAAudioEntity.m */; };
@@ -64,6 +65,7 @@
 /* Begin PBXFileReference section */
 		1DDA5FF396660C7C932DF9B8 /* libPods-SVGAPlayer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SVGAPlayer.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2EF4851C027B3C0E45E3C5C0 /* Pods-SVGAPlayer React.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SVGAPlayer React.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SVGAPlayer React/Pods-SVGAPlayer React.debug.xcconfig"; sourceTree = "<group>"; };
+		32E21CCB26B7D3C5008EB6EE /* homeLand_tribeShark.svga */ = {isa = PBXFileReference; lastKnownFileType = file; path = homeLand_tribeShark.svga; sourceTree = "<group>"; };
 		63712E6421787950001AE014 /* heartbeat.svga */ = {isa = PBXFileReference; lastKnownFileType = file; path = heartbeat.svga; sourceTree = "<group>"; };
 		63712E6621787A45001AE014 /* SVGAAudioEntity.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SVGAAudioEntity.h; sourceTree = "<group>"; };
 		63712E6721787A45001AE014 /* SVGAAudioEntity.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SVGAAudioEntity.m; sourceTree = "<group>"; };
@@ -251,6 +253,7 @@
 		90D7C9FA1F7E2AA3006E74F0 /* Samples */ = {
 			isa = PBXGroup;
 			children = (
+				32E21CCB26B7D3C5008EB6EE /* homeLand_tribeShark.svga */,
 				E83A58D8247E0E6A00D9F404 /* audio_biling.svga */,
 				718A146C235718E000FED5D3 /* Rocket.svga */,
 				71DAA8A42355B3ED006608A1 /* Goddess.svga */,
@@ -374,6 +377,7 @@
 				90CB64F91EF297E800DAA382 /* SVGAPlayer React-Info.plist in Resources */,
 				71A8679122B7785100176CD6 /* matteRect.svga in Resources */,
 				71A8679322B7853600176CD6 /* matteBitmap.svga in Resources */,
+				32E21CCC26B7D3C5008EB6EE /* homeLand_tribeShark.svga in Resources */,
 				90D7CA1C1F7FB114006E74F0 /* rose_1.5.0.svga in Resources */,
 				90D7CA1B1F7FB114006E74F0 /* rose_2.0.0.svga in Resources */,
 				E83A58D9247E0E6A00D9F404 /* audio_biling.svga in Resources */,

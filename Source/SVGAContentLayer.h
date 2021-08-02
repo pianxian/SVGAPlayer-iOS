@@ -12,6 +12,7 @@
 @class SVGABitmapLayer, SVGAVectorLayer, SVGAVideoSpriteFrameEntity;
 
 @interface SVGAContentLayer : CALayer
+@property (nonatomic, strong) NSArray<SVGAVideoSpriteFrameEntity *> *frames;
 
 @property (nonatomic, strong) NSString *imageKey;
 @property (nonatomic, assign) BOOL dynamicHidden;

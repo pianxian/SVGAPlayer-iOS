@@ -70,5 +70,8 @@
     layer.vectorLayer = [[SVGAVectorLayer alloc] initWithFrames:self.frames];
     return layer;
 }
-
+-(void)updateFrames:(NSArray<SVGAVideoSpriteFrameEntity *> *)frames{
+    _frames = frames;
+    
+}
 @end

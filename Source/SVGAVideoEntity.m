@@ -175,7 +175,10 @@ static NSMapTable * weakCache;
     return result;
 }
 
-- (void)resetImagesWithProtoObject:(SVGAProtoMovieEntity *)protoObject kernel:(CIColorKernel *)kernel metalColorInfo:(metalColorInfo)metalColorInfo{
+- (void)resetImagesWithProtoObject:(SVGAProtoMovieEntity *)protoObject
+                            kernel:(CIColorKernel *)kernel
+                    metalColorInfo:(metalColorInfo)metalColorInfo
+                      mirrorEnable:(BOOL)mirrorEnable{
     NSMutableDictionary<NSString *, UIImage *> *images = [[NSMutableDictionary alloc] init];
     NSMutableDictionary<NSString *, NSData *> *audiosData = [[NSMutableDictionary alloc] init];
     NSDictionary *protoImages = [protoObject.images copy];
@@ -190,7 +193,7 @@ static NSMapTable * weakCache;
 //                NSData *imageData = [NSData dataWithContentsOfFile:filePath];
                 NSData *imageData = [NSData dataWithContentsOfFile:filePath options:NSDataReadingMappedIfSafe error:NULL];
                 if (imageData != nil) {
-                    UIImage *image = [[UIImage alloc] initWithData:imageData scale:2.0];
+//                    UIImage *image = [[UIImage alloc] initWithData:imageData scale:2.0];
                     CIImage *ipuntImage = [CIImage imageWithData:imageData];
                     CIImage *outOutImage = [kernel applyWithExtent:ipuntImage.extent arguments:@[(id)ipuntImage,@(metalColorInfo.r/255.f),@(metalColorInfo.g/255.f),@(metalColorInfo.b /255.f)]];
 
@@ -208,7 +211,7 @@ static NSMapTable * weakCache;
                 // mp3
                 [audiosData setObject:protoImages[key] forKey:key];
             } else {
-                UIImage *image = [[UIImage alloc] initWithData:protoImages[key] scale:2.0];
+//                UIImage *image = [[UIImage alloc] initWithData:protoImages[key] scale:2.0];
                 
                 CIImage *ipuntImage = [CIImage imageWithData:protoImages[key]];
                 //(id)bgimage.CIImage;
@@ -220,7 +223,7 @@ static NSMapTable * weakCache;
                 
                 
                 if (resultImage != nil) {
-                    resultImage = [self imageByResizeToSize:resultImage.size sourceImage:resultImage];
+                    resultImage = [self imageByResizeToSize:resultImage.size sourceImage:resultImage mirrorEnable:mirrorEnable];
                     [images setObject:resultImage forKey:key];
                 }
             }
@@ -229,8 +232,7 @@ static NSMapTable * weakCache;
     self.images = images;
     self.audiosData = audiosData;
 }
-
-- (void)resetImagesWithProtoObject:(SVGAProtoMovieEntity *)protoObject {
+- (void)resetImagesWithProtoObject:(SVGAProtoMovieEntity *)protoObject mirrorEnable:(BOOL)mirrorEnable{
     NSMutableDictionary<NSString *, UIImage *> *images = [[NSMutableDictionary alloc] init];
     NSMutableDictionary<NSString *, NSData *> *audiosData = [[NSMutableDictionary alloc] init];
     NSDictionary *protoImages = [protoObject.images copy];
@@ -262,7 +264,7 @@ static NSMapTable * weakCache;
                 UIImage *image = [[UIImage alloc] initWithData:protoImages[key] scale:2.0];
                             
                 if (image != nil) {
-                    image = [self imageByResizeToSize:image.size sourceImage:image];
+                    image = [self imageByResizeToSize:image.size sourceImage:image mirrorEnable:mirrorEnable];
                     [images setObject:image forKey:key];
                 }
             }
@@ -271,13 +273,30 @@ static NSMapTable * weakCache;
     self.images = images;
     self.audiosData = audiosData;
 }
--(UIImage *)imageByResizeToSize:(CGSize)size sourceImage:(UIImage *)sourceImage{
+-(UIImage *)imageByResizeToSize:(CGSize)size sourceImage:(UIImage *)sourceImage mirrorEnable:(BOOL)mirrorEnable{
     if (size.width <= 0 || size.height <= 0) return nil;
+    
     UIGraphicsBeginImageContextWithOptions(size, NO, sourceImage.scale);
-    [sourceImage drawInRect:CGRectMake(0, 0, size.width, size.height)];
+    
+    CGContextRef currentContext =  UIGraphicsGetCurrentContext();
+    if (mirrorEnable) {
+        CGContextRotateCTM(currentContext, M_PI);
+        CGContextTranslateCTM(currentContext, -size.width, -size.height);
+        CGContextClipToRect(currentContext, CGRectMake(0, 0, size.width, size.height));
+        CGContextDrawImage(currentContext, CGRectMake(0, 0, size.width, size.height), sourceImage.CGImage);
+
+    }else{
+        [sourceImage drawInRect:CGRectMake(0, 0, size.width, size.height)];
+    }
+
+    
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    
     UIGraphicsEndImageContext();
-    return image;
+    
+
+    return [UIImage imageWithCGImage:image.CGImage scale:sourceImage.scale orientation:sourceImage.imageOrientation];
+//    return image;
 }
 - (void)resetSpritesWithProtoObject:(SVGAProtoMovieEntity *)protoObject {
     NSMutableArray<SVGAVideoSpriteEntity *> *sprites = [[NSMutableArray alloc] init];

@@ -34,10 +34,24 @@ typedef struct metalColorInfo{
 - (void)resetSpritesWithJSONObject:(NSDictionary *)JSONObject;
 
 - (instancetype)initWithProtoObject:(SVGAProtoMovieEntity *)protoObject cacheDir:(NSString *)cacheDir;
-- (void)resetImagesWithProtoObject:(SVGAProtoMovieEntity *)protoObject;
+
+/// 解压图片
+/// @param protoObject protoObject description
+/// @param mirrorEnable 是否需要镜像翻转
+- (void)resetImagesWithProtoObject:(SVGAProtoMovieEntity *)protoObject mirrorEnable:(BOOL)mirrorEnable;
 - (void)resetSpritesWithProtoObject:(SVGAProtoMovieEntity *)protoObject;
 - (void)resetAudiosWithProtoObject:(SVGAProtoMovieEntity *)protoObject;
-- (void)resetImagesWithProtoObject:(SVGAProtoMovieEntity *)protoObject kernel:(CIColorKernel *)kernel metalColorInfo:(metalColorInfo)metalColorInfo;
+
+/// 携带 Metal 滤镜方法
+/// @param protoObject protoObject description
+/// @param kernel metal kernel 对象
+/// @param metalColorInfo 颜色
+/// @param mirrorEnable 是否需要镜像
+- (void)resetImagesWithProtoObject:(SVGAProtoMovieEntity *)protoObject
+                            kernel:(CIColorKernel *)kernel
+                    metalColorInfo:(metalColorInfo)metalColorInfo
+                      mirrorEnable:(BOOL)mirrorEnable;
+
 - (void)resetImagesWithJSONObject:(NSDictionary *)JSONObject kernel:(CIColorKernel *)kernel metalColorInfo:(metalColorInfo)metalColorInfo;
 + (SVGAVideoEntity *)readCache:(NSString *)cacheKey;
 // NSCache缓存

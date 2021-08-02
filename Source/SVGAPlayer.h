@@ -33,6 +33,7 @@ typedef void(^SVGAPlayerDynamicDrawingBlock)(CALayer *contentLayer, NSInteger fr
 @property (nonatomic, assign) IBInspectable BOOL clearsAfterStop;
 @property (nonatomic, copy) NSString *fillMode;
 
+
 - (void)startAnimation;
 - (void)startAnimationWithRange:(NSRange)range reverse:(BOOL)reverse;
 - (void)pauseAnimation;
@@ -45,6 +46,11 @@ typedef void(^SVGAPlayerDynamicDrawingBlock)(CALayer *contentLayer, NSInteger fr
 
 - (void)setImage:(UIImage *)image forKey:(NSString *)aKey cornerRadius:(CGFloat)cornerRadius;
 - (void)setImageWithURL:(NSURL *)URL forKey:(NSString *)aKey cornerRadius:(CGFloat)cornerRadius;
+
+
+/// 设置需要翻转的图片的key
+/// @param mirrorImageKeys 需要翻转的图片的Key
+-(void)setMirrorImageKeys:(NSArray<NSString *> *)mirrorImageKeys;
 
 - (void)setImage:(UIImage *)image forKey:(NSString *)aKey cornerRadius:(CGFloat)cornerRadius referenceLayer:(CALayer *)referenceLayer; // deprecated from 2.0.1
 - (void)setAttributedText:(NSAttributedString *)attributedText forKey:(NSString *)aKey;

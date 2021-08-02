@@ -31,41 +31,48 @@ static NSOperationQueue *unzipQueue;
     unzipQueue.maxConcurrentOperationCount = 1;
 }
 - (void)parseWithURL:(nonnull NSURL *)URL
+        mirrorEnable:(BOOL)mirrorEnable
      completionBlock:(void ( ^ _Nonnull )(SVGAVideoEntity * _Nullable videoItem,NSData * _Nullable data))completionBlock
         failureBlock:(void ( ^ _Nullable)(NSError * _Nullable error))failureBlock{
-    [self parseWithURL:URL Kernel:nil metalColorInfo:(metalColorInfo){255.f,255.f,255.f,1.f} completionBlock:completionBlock failureBlock:failureBlock];
+    [self parseWithURL:URL mirrorEnable:mirrorEnable Kernel:nil metalColorInfo:(metalColorInfo){255.f,255.f,255.f,1.f} completionBlock:completionBlock failureBlock:failureBlock];
 }
 
 
 - (void)parseWithURLRequest:(NSURLRequest *_Nullable)URLRequest
+               mirrorEnable:(BOOL)mirrorEnable
             completionBlock:(void (^_Nonnull)(SVGAVideoEntity * _Nullable videoItem,NSData  * _Nullable  data))completionBlock failureBlock:(void (^_Nullable)(NSError * _Nullable))failureBlock{
-    [self parseWithURLRequest:URLRequest Kernel:nil metalColorInfo:(metalColorInfo){255.f,255.f,255.f,1.f} completionBlock:completionBlock failureBlock:failureBlock];
+    [self parseWithURLRequest:URLRequest mirrorEnable:mirrorEnable  Kernel:nil metalColorInfo:(metalColorInfo){255.f,255.f,255.f,1.f} completionBlock:completionBlock failureBlock:failureBlock];
 }
 
 - (void)parseWithCacheKey:(nonnull NSString *)cacheKey
+             mirrorEnable:(BOOL)mirrorEnable
           completionBlock:(void ( ^ _Nonnull)(SVGAVideoEntity * _Nonnull videoItem))completionBlock
              failureBlock:(void ( ^ _Nullable)(NSError * _Nonnull error))failureBlock{
-    [self parseWithCacheKey:cacheKey Kernel:nil metalColorInfo:(metalColorInfo){255.f,255.f,255.f,1.f} completionBlock:completionBlock failureBlock:failureBlock];
+    [self parseWithCacheKey:cacheKey mirrorEnable:mirrorEnable Kernel:nil metalColorInfo:(metalColorInfo){255.f,255.f,255.f,1.f} completionBlock:completionBlock failureBlock:failureBlock];
+
 }
 
 - (void)parseWithNamed:(NSString *_Nullable)named
+          mirrorEnable:(BOOL)mirrorEnable
               inBundle:(NSBundle *_Nullable)inBundle
        completionBlock:(void (^_Nonnull)(SVGAVideoEntity * _Nonnull videoItem))completionBlock
           failureBlock:(void (^_Nullable)(NSError * _Nonnull error))failureBlock{
-    [self parseWithNamed:named inBundle:inBundle Kernel:nil metalColorInfo:(metalColorInfo){255.f,255.f,255.f,1.f} completionBlock:completionBlock failureBlock:failureBlock];
+    [self parseWithNamed:named mirrorEnable:mirrorEnable inBundle:inBundle Kernel:nil metalColorInfo:(metalColorInfo){255.f,255.f,255.f,1.f} completionBlock:completionBlock failureBlock:failureBlock];
 }
 - (void)parseWithURL:(nonnull NSURL *)URL
+        mirrorEnable:(BOOL)mirrorEnable
               Kernel:(nullable CIColorKernel *)kenel
               metalColorInfo:(metalColorInfo)metalColorInfo
      completionBlock:(void ( ^ _Nonnull )(SVGAVideoEntity * _Nullable videoItem,NSData * _Nullable data))completionBlock
         failureBlock:(void ( ^ _Nullable)(NSError * _Nullable error))failureBlock {
-    [self parseWithURLRequest:[NSURLRequest requestWithURL:URL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:20.0] Kernel:kenel metalColorInfo:metalColorInfo completionBlock:completionBlock failureBlock:failureBlock];
+    [self parseWithURLRequest:[NSURLRequest requestWithURL:URL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:20.0] mirrorEnable:mirrorEnable Kernel:kenel metalColorInfo:metalColorInfo completionBlock:completionBlock failureBlock:failureBlock];
 //    [self parseWithURLRequest:[NSURLRequest requestWithURL:URL cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:20.0]
 //    completionBlock:completionBlock
 //       failureBlock:failureBlock];
 }
 
 - (void)parseWithURLRequest:(NSURLRequest *)URLRequest
+                 mirrorEnable:(BOOL)mirrorEnable
                      Kernel:(nullable CIColorKernel *)kenel
                      metalColorInfo:(metalColorInfo)metalColorInfo
             completionBlock:(void (^)(SVGAVideoEntity * _Nullable videoItem,NSData  * _Nullable  data))completionBlock failureBlock:(void (^)(NSError * _Nullable))failureBlock {
@@ -78,7 +85,7 @@ static NSOperationQueue *unzipQueue;
         return;
     }
     if ([[NSFileManager defaultManager] fileExistsAtPath:[self cacheDirectory:[self cacheKey:URLRequest.URL]]]) {
-        [self parseWithCacheKey:[self cacheKey:URLRequest.URL] Kernel:kenel metalColorInfo:metalColorInfo completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
+        [self parseWithCacheKey:[self cacheKey:URLRequest.URL] mirrorEnable:mirrorEnable Kernel:kenel metalColorInfo:metalColorInfo completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
             if (completionBlock) {
                 [[NSOperationQueue mainQueue] addOperationWithBlock:^{
                     completionBlock(videoItem,nil);
@@ -93,11 +100,14 @@ static NSOperationQueue *unzipQueue;
             }
         }];
 
+
         return;
     }
     [[[NSURLSession sharedSession] dataTaskWithRequest:URLRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         if (error == nil && data != nil) {
-            [self parseWithData:data cacheKey:[self cacheKey:URLRequest.URL] Kernel:kenel metalColorInfo:metalColorInfo completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
+            
+            
+            [self parseWithData:data mirrorEnable:mirrorEnable cacheKey:[self cacheKey:URLRequest.URL] Kernel:kenel metalColorInfo:metalColorInfo completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
                 if (completionBlock) {
                     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
                         completionBlock(videoItem,data);
@@ -111,6 +121,7 @@ static NSOperationQueue *unzipQueue;
                     }];
                 }
             }];
+
         }
         else {
             if (failureBlock) {
@@ -123,6 +134,7 @@ static NSOperationQueue *unzipQueue;
 }
 
 - (void)parseWithNamed:(NSString *)named
+          mirrorEnable:(BOOL)mirrorEnable
               inBundle:(NSBundle *)inBundle
                 Kernel:(nullable CIColorKernel *)kenel
                 metalColorInfo:(metalColorInfo)metalColorInfo
@@ -137,11 +149,13 @@ static NSOperationQueue *unzipQueue;
         }
         return;
     }
-    [self parseWithData:[NSData dataWithContentsOfFile:filePath] cacheKey:[self cacheKey:[NSURL fileURLWithPath:filePath]] Kernel:kenel metalColorInfo:metalColorInfo completionBlock:completionBlock failureBlock:failureBlock];
+    [self parseWithData:[NSData dataWithContentsOfFile:filePath]
+           mirrorEnable:mirrorEnable cacheKey:[self cacheKey:[NSURL fileURLWithPath:filePath]] Kernel:kenel metalColorInfo:metalColorInfo completionBlock:completionBlock failureBlock:failureBlock];
 
 }
 
 - (void)parseWithCacheKey:(nonnull NSString *)cacheKey
+             mirrorEnable:(BOOL)mirrorEnable
                    Kernel:(nullable CIColorKernel *)kenel
                    metalColorInfo:(metalColorInfo)metalColorInfo
           completionBlock:(void ( ^ _Nonnull)(SVGAVideoEntity * _Nonnull videoItem))completionBlock
@@ -164,10 +178,10 @@ static NSOperationQueue *unzipQueue;
             if (!err && [protoObject isKindOfClass:[SVGAProtoMovieEntity class]]) {
                 SVGAVideoEntity *videoItem = [[SVGAVideoEntity alloc] initWithProtoObject:protoObject cacheDir:cacheDir];
                 if (kenel) {
-                    [videoItem resetImagesWithProtoObject:protoObject kernel:kenel metalColorInfo:metalColorInfo];
+                    [videoItem resetImagesWithProtoObject:protoObject kernel:kenel metalColorInfo:metalColorInfo mirrorEnable:mirrorEnable];
 
                 }else{
-                    [videoItem resetImagesWithProtoObject:protoObject];
+                    [videoItem resetImagesWithProtoObject:protoObject mirrorEnable:mirrorEnable];
 
                 }
                 [videoItem resetSpritesWithProtoObject:protoObject];
@@ -240,13 +254,16 @@ static NSOperationQueue *unzipQueue;
     return result;
 }
 - (void)parseWithData:(nonnull NSData *)data
+         mirrorEnable:(BOOL)mirrorEnable
              cacheKey:(nonnull NSString *)cacheKey
       completionBlock:(void ( ^ _Nonnull)(SVGAVideoEntity * _Nonnull videoItem))completionBlock
          failureBlock:(void ( ^ _Nullable)(NSError * _Nonnull error))failureBlock{
-    [self parseWithData:data cacheKey:cacheKey Kernel:nil metalColorInfo:(metalColorInfo){255.f,255.f,255.f,1.f} completionBlock:completionBlock failureBlock:failureBlock];
+    [self parseWithData:data mirrorEnable:mirrorEnable cacheKey:cacheKey Kernel:nil metalColorInfo:(metalColorInfo){255.f,255.f,255.f,1.f} completionBlock:completionBlock failureBlock:failureBlock];
+
 }
 
 - (void)parseWithData:(nonnull NSData *)data
+         mirrorEnable:(BOOL)mirrorEnable
              cacheKey:(nonnull NSString *)cacheKey
                Kernel:(nullable CIColorKernel *)kenel
        metalColorInfo:(metalColorInfo)metalColorInfo
@@ -273,9 +290,9 @@ static NSOperationQueue *unzipQueue;
             if (!err && [protoObject isKindOfClass:[SVGAProtoMovieEntity class]]) {
                 SVGAVideoEntity *videoItem = [[SVGAVideoEntity alloc] initWithProtoObject:protoObject cacheDir:@""];
                 if (kenel) {
-                    [videoItem resetImagesWithProtoObject:protoObject kernel:kenel metalColorInfo:metalColorInfo];
+                    [videoItem resetImagesWithProtoObject:protoObject kernel:kenel metalColorInfo:metalColorInfo mirrorEnable:mirrorEnable];
                 }else{
-                    [videoItem resetImagesWithProtoObject:protoObject];
+                    [videoItem resetImagesWithProtoObject:protoObject mirrorEnable:mirrorEnable];
                 }
                 [videoItem resetSpritesWithProtoObject:protoObject];
                 [videoItem resetAudiosWithProtoObject:protoObject];
@@ -295,7 +312,7 @@ static NSOperationQueue *unzipQueue;
     }
     [unzipQueue addOperationWithBlock:^{
         if ([[NSFileManager defaultManager] fileExistsAtPath:[self cacheDirectory:cacheKey]]) {
-            [self parseWithCacheKey:cacheKey Kernel:kenel metalColorInfo:metalColorInfo completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
+            [self parseWithCacheKey:cacheKey mirrorEnable:mirrorEnable Kernel:kenel metalColorInfo:metalColorInfo completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
                 if (completionBlock) {
                     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
                         completionBlock(videoItem);
@@ -336,9 +353,9 @@ static NSOperationQueue *unzipQueue;
                             if (!err) {
                                 SVGAVideoEntity *videoItem = [[SVGAVideoEntity alloc] initWithProtoObject:protoObject cacheDir:cacheDir];
                                 if (kenel) {
-                                    [videoItem resetImagesWithProtoObject:protoObject kernel:kenel metalColorInfo:metalColorInfo];
+                                    [videoItem resetImagesWithProtoObject:protoObject kernel:kenel metalColorInfo:metalColorInfo mirrorEnable:mirrorEnable];
                                 }else{
-                                    [videoItem resetImagesWithProtoObject:protoObject];
+                                    [videoItem resetImagesWithProtoObject:protoObject mirrorEnable:mirrorEnable];
                                 }
                                 [videoItem resetSpritesWithProtoObject:protoObject];
                                 if (self.enabledMemoryCache) {

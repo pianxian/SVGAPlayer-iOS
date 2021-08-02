@@ -51,28 +51,57 @@ static SVGAParser *parser;
                        ];
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 //    parser.enabledMemoryCache = YES;
-    [parser parseWithURL:[NSURL URLWithString:items[arc4random() % items.count]]
-         completionBlock:^(SVGAVideoEntity * _Nullable videoItem) {
-             [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-             if (videoItem != nil) {
-                 self.aPlayer.videoItem = videoItem;
-                 NSMutableParagraphStyle *para = [[NSMutableParagraphStyle alloc] init];
-                 [para setLineBreakMode:NSLineBreakByTruncatingTail];
-                 [para setAlignment:NSTextAlignmentCenter];
-                 NSAttributedString *str = [[NSAttributedString alloc]
-                                            initWithString:@"Hello, World! Hello, World!"
-                                            attributes:@{
-                                                NSFontAttributeName: [UIFont systemFontOfSize:28],
-                                                NSForegroundColorAttributeName: [UIColor whiteColor],
-                                                NSParagraphStyleAttributeName: para,
-                                            }];
-                 [self.aPlayer setAttributedText:str forKey:@"banner"];
+    
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"homeLand_tribeShark" ofType:@"svga"];
+    [parser parseWithData:[NSData dataWithContentsOfFile:path] mirrorEnable:YES cacheKey:@"1234" completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
+        if (videoItem != nil) {
 
-                 [self.aPlayer startAnimation];
-                 
+            self.aPlayer.videoItem = videoItem;
+            [self.aPlayer setMirrorImageKeys:@[@"img_14"]];
+
+            NSMutableParagraphStyle *para = [[NSMutableParagraphStyle alloc] init];
+            [para setLineBreakMode:NSLineBreakByTruncatingTail];
+            [para setAlignment:NSTextAlignmentCenter];
+            NSAttributedString *str = [[NSAttributedString alloc]
+                                       initWithString:@"Hello, World! Hello, World!"
+                                       attributes:@{
+                                           NSFontAttributeName: [UIFont systemFontOfSize:28],
+                                           NSForegroundColorAttributeName: [UIColor whiteColor],
+                                           NSParagraphStyleAttributeName: para,
+                                       }];
+            [self.aPlayer setAttributedText:str forKey:@"banner"];
+
+            [self.aPlayer startAnimation];
+            
 //                 [self.aPlayer startAnimationWithRange:NSMakeRange(10, 25) reverse:YES];
-             }
-         } failureBlock:nil];
+        }
+    } failureBlock:^(NSError * _Nonnull error) {
+        
+    }];
+
+//    [parser parseWithURL:[NSURL URLWithString:items[arc4random() % items.count]]
+//         completionBlock:^(SVGAVideoEntity * _Nullable videoItem,NSData
+//                            *data) {
+//             [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+//             if (videoItem != nil) {
+//                 self.aPlayer.videoItem = videoItem;
+//                 NSMutableParagraphStyle *para = [[NSMutableParagraphStyle alloc] init];
+//                 [para setLineBreakMode:NSLineBreakByTruncatingTail];
+//                 [para setAlignment:NSTextAlignmentCenter];
+//                 NSAttributedString *str = [[NSAttributedString alloc]
+//                                            initWithString:@"Hello, World! Hello, World!"
+//                                            attributes:@{
+//                                                NSFontAttributeName: [UIFont systemFontOfSize:28],
+//                                                NSForegroundColorAttributeName: [UIColor whiteColor],
+//                                                NSParagraphStyleAttributeName: para,
+//                                            }];
+//                 [self.aPlayer setAttributedText:str forKey:@"banner"];
+//
+//                 [self.aPlayer startAnimation];
+//
+////                 [self.aPlayer startAnimationWithRange:NSMakeRange(10, 25) reverse:YES];
+//             }
+//         } failureBlock:nil];
 //
 //        [parser parseWithURL:[NSURL URLWithString:@"https://github.com/svga/SVGA-Samples/raw/master_aep/BitmapColorArea1.svga"] completionBlock:^(SVGAVideoEntity * _Nullable videoItem) {
 //            if (videoItem != nil) {

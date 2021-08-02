@@ -22,6 +22,7 @@ static SVGAParser *sharedParser;
     self = [super initWithCoder:coder];
     if (self) {
         _autoPlay = YES;
+        
     }
     return self;
 }
@@ -30,7 +31,9 @@ static SVGAParser *sharedParser;
     _imageName = imageName;
     if ([imageName hasPrefix:@"http://"] || [imageName hasPrefix:@"https://"]) {
 //        metalColorInfo info = {1,1,1,1};
-        [sharedParser parseWithURL:[NSURL URLWithString:imageName]  completionBlock:^(SVGAVideoEntity * _Nullable videoItem, NSData * _Nullable data) {
+        [sharedParser parseWithURL:[NSURL URLWithString:imageName]
+                   mirrorEnable:NO
+                   completionBlock:^(SVGAVideoEntity * _Nullable videoItem, NSData * _Nullable data) {
             [self setVideoItem:videoItem];
             if (self.autoPlay) {
                 [self startAnimation];
@@ -46,7 +49,7 @@ static SVGAParser *sharedParser;
 //        } failureBlock:nil];
     }
     else {
-        [sharedParser parseWithNamed:imageName inBundle:nil completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
+        [sharedParser parseWithNamed:imageName mirrorEnable:NO inBundle:nil completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
             [self setVideoItem:videoItem];
             if (self.autoPlay) {
                 [self startAnimation];

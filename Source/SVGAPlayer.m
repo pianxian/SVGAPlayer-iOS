@@ -26,6 +26,8 @@
 @property (nonatomic, assign) NSInteger currentFrame;
 @property (nonatomic, copy) NSArray *contentLayers;
 @property (nonatomic, copy) NSDictionary<NSString *, UIImage *> *dynamicObjects;
+@property (nonatomic, copy) NSArray<NSString *> *mirrorKeys;
+
 @property (nonatomic, copy) NSDictionary<NSString *, NSAttributedString *> *dynamicTexts;
 @property (nonatomic, copy) NSDictionary<NSString *, SVGAPlayerDynamicDrawingBlock> *dynamicDrawings;
 @property (nonatomic, copy) NSDictionary<NSString *, NSNumber *> *dynamicHiddens;
@@ -188,7 +190,34 @@
                 bitmap = self.videoItem.images[bitmapKey];
             }
         }
-        SVGAContentLayer *contentLayer = [sprite requestLayerWithBitmap:bitmap];
+        __block SVGAContentLayer *contentLayer;
+        if (self.mirrorKeys.count) {
+            [self.mirrorKeys enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger mirrIdx, BOOL * _Nonnull stop) {
+                    
+                    
+                    if ([sprite.imageKey isEqualToString:obj]) {
+                       
+                        NSMutableArray <SVGAVideoSpriteFrameEntity *>*layerFrames = sprite.frames.mutableCopy;
+                        [layerFrames enumerateObjectsUsingBlock:^(SVGAVideoSpriteFrameEntity * _Nonnull obj, NSUInteger layIdx, BOOL * _Nonnull stop) {
+                            obj.transform =  CGAffineTransformMake((CGFloat)obj.protoObject.transform.a,
+                                                                   (CGFloat)obj.protoObject.transform.b,
+                                                                   (CGFloat)obj.protoObject.transform.c,
+                                                                   (CGFloat)obj.protoObject.transform.d,
+                                                                   self.videoItem.videoSize.width -(CGFloat)obj.protoObject.transform.tx-(CGFloat)obj.protoObject.layout.width,
+                                                                   (CGFloat)obj.protoObject.transform.ty);
+                            [obj resetLayout];
+                            [layerFrames replaceObjectAtIndex:layIdx withObject:obj];
+                        }];
+                        [sprite updateFrames:layerFrames];
+                    }
+                contentLayer = [sprite requestLayerWithBitmap:bitmap];
+
+            }];
+        }else{
+            contentLayer = [sprite requestLayerWithBitmap:bitmap];
+        }
+         
+       
         contentLayer.imageKey = sprite.imageKey;
         [tempContentLayers addObject:contentLayer];
         if ([sprite.imageKey hasSuffix:@".matte"]) {
@@ -397,7 +426,39 @@
 }
 
 #pragma mark - Dynamic Object
+/// 设置需要翻转的图片的key
+/// @param mirrorImageKeys 需要翻转的图片的Key
+-(void)setMirrorImageKeys:(NSArray<NSString *> *)mirrorImageKeys{
+    if (!mirrorImageKeys.count)return;
+    
+    NSMutableArray <NSString *>*mirrorKeys = self.mirrorKeys.mutableCopy;
+    [mirrorKeys addObjectsFromArray:mirrorImageKeys];
+    self.mirrorKeys = mirrorKeys;
+    if (self.contentLayers.count >0) {
+        [mirrorKeys enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            for (SVGAContentLayer *layer in self.contentLayers) {
+                
+                
+                if ([layer isKindOfClass:[SVGAContentLayer class]] && [layer.imageKey isEqualToString:obj]) {
+                   
+                    NSMutableArray <SVGAVideoSpriteFrameEntity *>*layerFrames = layer.frames.mutableCopy;
+                    [layerFrames enumerateObjectsUsingBlock:^(SVGAVideoSpriteFrameEntity * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                        obj.transform =  CGAffineTransformMake((CGFloat)obj.transform.a,
+                                                               (CGFloat)obj.transform.b,
+                                                               (CGFloat)obj.transform.c,
+                                                               (CGFloat)obj.transform.d,
+                                                               self.videoItem.videoSize.width -(CGFloat)obj.transform.tx-(CGFloat)obj.layout.size.width,
+                                                               (CGFloat)obj.transform.ty);
+                        
+                    }];
+                    layer.frames = layerFrames;
+                    
+                }
+            }
+        }];
 
+    }
+}
 - (void)setImage:(UIImage *)image forKey:(NSString *)aKey cornerRadius:(CGFloat)cornerRadius{
     if (image == nil) {
         return;
@@ -501,6 +562,7 @@
     self.dynamicTexts = nil;
     self.dynamicHiddens = nil;
     self.dynamicDrawings = nil;
+    self.mirrorKeys = nil;
 }
 
 - (NSDictionary *)dynamicObjects {
@@ -508,6 +570,12 @@
         _dynamicObjects = @{};
     }
     return _dynamicObjects;
+}
+-(NSArray<NSString *>*)mirrorKeys{
+    if (!_mirrorKeys) {
+        _mirrorKeys = @[];
+    }
+    return _mirrorKeys;
 }
 
 - (NSDictionary *)dynamicTexts {
@@ -523,6 +591,7 @@
     }
     return _dynamicHiddens;
 }
+
 
 - (NSDictionary<NSString *,SVGAPlayerDynamicDrawingBlock> *)dynamicDrawings {
     if (_dynamicDrawings == nil) {

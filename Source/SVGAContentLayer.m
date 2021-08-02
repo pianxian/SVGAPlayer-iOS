@@ -13,7 +13,6 @@
 
 @interface SVGAContentLayer ()
 
-@property (nonatomic, strong) NSArray<SVGAVideoSpriteFrameEntity *> *frames;
 @property (nonatomic, assign) NSTextAlignment textLayerAlignment;
 
 @end
