@@ -2,6 +2,10 @@
 
 [简体中文](./readme.zh.md)
 
+## 支持本项目
+
+1. 轻点 GitHub Star，让更多人看到该项目。
+
 ## 2.5.0 Released
 
 This version add Support for matte layer and dynamic matte bitmap.<br>
