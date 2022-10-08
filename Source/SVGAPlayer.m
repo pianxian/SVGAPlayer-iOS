@@ -358,7 +358,7 @@
         }
     }
     [CATransaction setDisableActions:NO];
-    if (self.forwardAnimating && self.audioLayers.count > 0) {
+    if (self.forwardAnimating && self.audioLayers.count > 0 && !self.muted) {
         for (SVGAAudioLayer *layer in self.audioLayers) {
             if (!layer.audioPlaying && layer.audioItem.startFrame <= self.currentFrame && self.currentFrame <= layer.audioItem.endFrame) {
                 [layer.audioPlayer setCurrentTime:(NSTimeInterval)(layer.audioItem.startTime / 1000)];
